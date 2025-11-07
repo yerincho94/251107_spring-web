@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 @Repository
-public class SupabaseRepository implements FoodRepository{
+public class SupabaseRepository implements FoodRepository {
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String API_URL;
@@ -21,41 +21,58 @@ public class SupabaseRepository implements FoodRepository{
 
     public SupabaseRepository() {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        this.API_URL = dotenv.get("SUPABASE_API_URL");
-        this.API_KEY = dotenv.get("SUPABASE_API_KEY");
+        API_URL = dotenv.get("SUPABASE_API_URL");
+        API_KEY = dotenv.get("SUPABASE_API_KEY");
     }
 
+    /*
+    curl 'https://virjgfryiydaoswoetca.supabase.co/rest/v1/FOOD?select=*' \
+    -H "apikey: SUPABASE_KEY" \
+    -H "Authorization: Bearer SUPABASE_KEY"
+     */
     @Override
     public List<Food> findAll() {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("%s/rest/v1/FOOD?select=*".formatted(API_URL)))
-                .header("api-key", API_KEY)
+                .header("apikey", API_KEY)
                 .header("Authorization", "Bearer %s".formatted(API_KEY))
                 .build();
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return objectMapper.readValue(response.body(),new TypeReference<>(){});
+            HttpResponse<String> response = httpClient
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+            return objectMapper.readValue(response.body(), new TypeReference<>(){});
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
+    /*
+    curl -X POST 'https://virjgfryiydaoswoetca.supabase.co/rest/v1/FOOD' \
+        -H "apikey: SUPABASE_KEY" \
+        -H "Authorization: Bearer SUPABASE_KEY" \
+        -H "Content-Type: application/json" \
+        -H "Prefer: return=minimal" \
+        -d '{ "some_column": "someValue", "other_column": "otherValue" }'
+     */
     @Override
     public void save(Food food) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("%s/rest/v1/FOOD?select=*".formatted(API_URL)))
-                .header("api-key", API_KEY)
+                .uri(URI.create("%s/rest/v1/FOOD".formatted(API_URL)))
+                .header("apikey", API_KEY)
                 .header("Authorization", "Bearer %s".formatted(API_KEY))
                 .header("Content-Type", "application/json")
                 .header("Prefer", "return=minimal")
-                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(food)))
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        objectMapper.writeValueAsString(food)
+                ))
                 .build();
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient
+                    .send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println(response.statusCode());
             System.out.println(response.body());
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 }

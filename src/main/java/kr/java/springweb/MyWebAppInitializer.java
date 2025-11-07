@@ -20,9 +20,8 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
 
         // DispatcherServlet등록 <- Spring에서는 DispatcherServlet을 중앙에 위치시킨 다음에 Spring에 등록된 여러 페이지를 알아서 배치
         DispatcherServlet dispatcherServlet = new DispatcherServlet(context); // context를 연결시켜줘야함.
-        ServletRegistration.Dynamic registration = servletContext.addServlet("dispatcherServlet", dispatcherServlet);
+        ServletRegistration.Dynamic registration = servletContext.addServlet("dispatcher", dispatcherServlet);
         registration.setLoadOnStartup(1);
         registration.addMapping("/");
-
     }
 }
